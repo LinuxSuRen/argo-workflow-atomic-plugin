@@ -60,17 +60,15 @@ spec:
   - name: main
     dag:
       tasks:
-        - name: search
-          template: search
+        - name: sleep
+          template: sleep
         - name: atomic
           template: atomic
-  - container:
-      args:
-        - fetch
-      command:
-        - hd
+  - script:
       image: ghcr.io/linuxsuren/hd:v0.0.70
-    name: search
+      command: [sh]
+      source: sleep 90
+    name: sleep
   - name: atomic
     plugin:
       argo-atomic-plugin: {}

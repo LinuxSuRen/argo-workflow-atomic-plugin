@@ -42,4 +42,5 @@ metadata:
     workflows.argoproj.io/configmap-type: ExecutorPlugin
   name: argo-atomic-plugin
   namespace: argo
+EOF
 ```

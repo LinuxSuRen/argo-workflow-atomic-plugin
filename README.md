@@ -12,7 +12,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: argo-atomic-plugin
+  name: argo-atomic-plugin-executor-plugin
   namespace: default
 ---
 apiVersion: v1

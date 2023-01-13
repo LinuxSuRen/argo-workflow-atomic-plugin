@@ -21,7 +21,7 @@ data:
   sidecar.container: |
     image: ghcr.io/linuxsuren/argo-workflow-atomic-plugin:master
     command:
-    - argo-atomic
+    - argo-wf-atomic
     name: argo-atomic-plugin
     ports:
     - containerPort: 3002

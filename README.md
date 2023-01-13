@@ -44,3 +44,45 @@ metadata:
   namespace: argo
 EOF
 ```
+
+## Try it
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: plugin-atomic
+  namespace: default
+spec:
+  entrypoint: main
+  hooks:
+    exit:
+      template: status
+    all:
+      template: status
+      expression: "true"
+  templates:
+  - container:
+      args:
+        - search
+        - kubectl
+      command:
+        - hd
+      image: ghcr.io/linuxsuren/hd:v0.0.70
+    name: main
+  - name: status
+    plugin:
+      argo-atomic-plugin: {}
+EOF
+cat <<EOF | kubectl create -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: plugin-atomic
+  namespace: default
+spec:
+  workflowTemplateRef:
+    name: plugin-atomic
+EOF
+```

@@ -56,22 +56,22 @@ metadata:
   namespace: default
 spec:
   entrypoint: main
-  hooks:
-    exit:
-      template: status
-    all:
-      template: status
-      expression: "true"
   templates:
+  - name: main
+    dag:
+      tasks:
+        - name: search
+          template: search
+        - name: atomic
+          template: atomic
   - container:
       args:
-        - search
-        - kubectl
+        - fetch
       command:
         - hd
       image: ghcr.io/linuxsuren/hd:v0.0.70
-    name: main
-  - name: status
+    name: search
+  - name: atomic
     plugin:
       argo-atomic-plugin: {}
 EOF

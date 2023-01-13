@@ -56,8 +56,14 @@ var (
 
 func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
+		var isNot404 bool
 		var err error
 		defer func() {
+			if !isNot404 {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
 			var nodeResult *wfv1.NodeResult
 			if err == nil {
 				nodeResult = &wfv1.NodeResult{
@@ -98,6 +104,15 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 		args := executor.ExecuteTemplateArgs{}
 		if err = json.Unmarshal(body, &args); err != nil || args.Workflow == nil || args.Template == nil {
 			err = ErrMarshallingBody
+			return
+		}
+
+		p := args.Template.Plugin.Value
+		opt := map[string]interface{}{}
+		if err = json.Unmarshal(p, &opt); err != nil {
+			return
+		}
+		if _, isNot404 = opt["argo-atomic-plugin"]; !isNot404 {
 			return
 		}
 

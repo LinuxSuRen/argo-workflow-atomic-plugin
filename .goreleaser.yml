@@ -1,9 +1,9 @@
 # Official documentation at http://goreleaser.com
-project_name: github-go
+project_name: argo-wf-atomic
 builds:
 - env:
   - CGO_ENABLED=0
-  binary: github-go
+  binary: argo-wf-atomic
   goarch:
     - amd64
     - arm64
@@ -11,9 +11,6 @@ builds:
     - windows
     - linux
     - darwin
-  hooks:
-    post:
-      - upx "{{ .Path }}"
   ldflags:
     - -X github.com/linuxsuren/cgit/app.version={{.Version}}
     - -X github.com/linuxsuren/cgit/app.commit={{.ShortCommit}}
@@ -22,25 +19,10 @@ builds:
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
-  replacements:
-    darwin: darwin
-    linux: linux
-    windows: windows
-    amd64: amd64
-    arm64: arm64
   format_overrides:
     - goos: windows
       format: zip
   files:
     - README.md
-checksum:
-  name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next-{{.ShortCommit}}"
-changelog:
-  skip: true
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'

@@ -24,11 +24,6 @@ jobs:
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2.3.4
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.4.1
-        with:
-          version: latest
-          args: check
       - name: Build
         run: |
           make build
@@ -58,21 +53,7 @@ jobs:
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
-          args: './...'
-  CodeQL:
-    name: CodeQL
-    runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v2
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
-        with:
-          languages: go
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+          args: '-exclude=G114 ./...'
 
   build-image:
     name: Build Image

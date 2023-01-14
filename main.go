@@ -49,9 +49,9 @@ type option struct {
 }
 
 var (
-	ErrWrongContentType = errors.New("Content-Type header is not set to 'appliaction/json'")
-	ErrReadingBody      = errors.New("couldn't read request body")
-	ErrMarshallingBody  = errors.New("couldn't unmrashal request body")
+	errWrongContentType = errors.New("Content-Type header is not set to 'appliaction/json'")
+	errReadingBody      = errors.New("couldn't read request body")
+	errMarshallingBody  = errors.New("couldn't unmrashal request body")
 )
 
 func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http.Request) {
@@ -90,20 +90,20 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 		}()
 
 		if header := req.Header.Get("Content-Type"); header != "application/json" {
-			err = ErrWrongContentType
+			err = errWrongContentType
 			return
 		}
 
 		var body []byte
 		if body, err = io.ReadAll(req.Body); err != nil {
-			err = ErrReadingBody
+			err = errReadingBody
 			return
 		}
 
 		fmt.Println(string(body))
 		args := executor.ExecuteTemplateArgs{}
 		if err = json.Unmarshal(body, &args); err != nil || args.Workflow == nil || args.Template == nil {
-			err = ErrMarshallingBody
+			err = errMarshallingBody
 			return
 		}
 
@@ -145,8 +145,9 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 				continue
 			}
 
-			wf.Spec.Shutdown = wfv1.ShutdownStrategyStop
-			if _, err = client.ArgoprojV1alpha1().Workflows(ns).Update(ctx, &wf, v1.UpdateOptions{}); err != nil {
+			wfCopied := wf.DeepCopy()
+			wfCopied.Spec.Shutdown = wfv1.ShutdownStrategyStop
+			if _, err = client.ArgoprojV1alpha1().Workflows(ns).Update(ctx, wfCopied, v1.UpdateOptions{}); err != nil {
 				return
 			}
 		}

@@ -9,7 +9,19 @@ In most cases, only the last time of the workflow running is necessary. This plu
 parameters and come from same WorkflowTemplate.
 
 ## Install
+First, enable the plugin feature of Argo workflows:
+```shell
+kubectl patch deployment \
+  workflow-controller \
+  --namespace argo \
+  --type='json' \
+  -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env/0", "value": {
+    "name": "ARGO_EXECUTOR_PLUGINS",
+    "value": "true",
+}}]'
+```
 
+then, install this plugin as a ConfigMap:
 ```shell
 cat <<EOF | kubectl apply -f -
 ---
@@ -17,6 +29,40 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: argo-atomic-plugin-executor-plugin
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argo-plugin-addition-role
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflowtasksets
+  - workflowtasksets/status
+  verbs:
+  - get
+  - watch
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argo-plugin-atomic-addition-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-plugin-addition-role
+subjects:
+- kind: ServiceAccount
+  name: argo-atomic-plugin-executor-plugin
+  namespace: default
+- kind: ServiceAccount
+  name: argo
+  namespace: argo
+- kind: ServiceAccount
+  name: default
   namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -34,6 +80,9 @@ subjects:
 - kind: ServiceAccount
   name: argo
   namespace: argo
+- kind: ServiceAccount
+  name: default
+  namespace: default
 ---
 apiVersion: v1
 data:

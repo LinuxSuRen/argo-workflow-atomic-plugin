@@ -24,14 +24,5 @@ archives:
       format: zip
   files:
     - README.md
-checksum:
-  name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next-{{.ShortCommit}}"
-changelog:
-  skip: true
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'

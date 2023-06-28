@@ -8,7 +8,7 @@ WORKDIR /workspace
 COPY . .
 
 RUN go mod download
-RUN GOPROXY=${GOPROXY} CGO_ENABLE=0 go build -ldflags "-w -s" -o argo-wf-atomic
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o argo-wf-atomic
 
 FROM ${BASE}
 

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/argoproj/argo-workflows/v3 v3.4.4
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	k8s.io/apimachinery v0.26.0
 	k8s.io/client-go v0.26.0
 )

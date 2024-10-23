@@ -130,14 +130,22 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 			return
 		}
 
+		if workflow.Spec.WorkflowTemplateRef == nil {
+			fmt.Println("not belong to a template: ", wfName, ns)
+			return
+		}
+
 		var workflows *wfv1.WorkflowList
 		if workflows, err = client.ArgoprojV1alpha1().Workflows(ns).List(ctx, v1.ListOptions{
-			LabelSelector: fmt.Sprintf("workflows.argoproj.io/completed!=true,workflows.argoproj.io/workflow-template=%s", workflow.Spec.WorkflowTemplateRef.Name),
+			LabelSelector: "workflows.argoproj.io/phase=Running",
 		}); err != nil {
 			return
 		}
 
 		for _, wf := range workflows.Items {
+			if wf.Spec.WorkflowTemplateRef == nil || wf.Spec.WorkflowTemplateRef.Name != workflow.Spec.WorkflowTemplateRef.Name {
+				continue
+			}
 			if wf.Name == wfName {
 				continue
 			}

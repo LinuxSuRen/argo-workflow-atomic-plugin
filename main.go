@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -100,7 +99,7 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 			return
 		}
 
-		fmt.Println(string(body))
+		fmt.Println("request body:", string(body))
 		args := executor.ExecuteTemplateArgs{}
 		if err = json.Unmarshal(body, &args); err != nil || args.Workflow == nil || args.Template == nil {
 			err = errMarshallingBody
@@ -118,12 +117,12 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 
 		ns := args.Workflow.ObjectMeta.Namespace
 		wfName := args.Workflow.ObjectMeta.Name
-		ctx := context.Background()
+		ctx := req.Context()
 
 		// find the Workflow
 		var workflow *wfv1.Workflow
 		if workflow, err = client.ArgoprojV1alpha1().Workflows(ns).Get(
-			context.Background(),
+			ctx,
 			wfName,
 			v1.GetOptions{}); err != nil {
 			fmt.Println("failed to find workflow", wfName, ns, err)
@@ -143,10 +142,10 @@ func plugin(client *wfclientset.Clientset) func(w http.ResponseWriter, req *http
 		}
 
 		for _, wf := range workflows.Items {
-			if wf.Spec.WorkflowTemplateRef == nil || wf.Spec.WorkflowTemplateRef.Name != workflow.Spec.WorkflowTemplateRef.Name {
+			if wf.Name == wfName {
 				continue
 			}
-			if wf.Name == wfName {
+			if !reflect.DeepEqual(wf.Spec.WorkflowTemplateRef, workflow.Spec.WorkflowTemplateRef) {
 				continue
 			}
 			if !reflect.DeepEqual(wf.Spec.Arguments, workflow.Spec.Arguments) {
